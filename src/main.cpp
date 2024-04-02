@@ -50,5 +50,7 @@ int main(int argc, char *argv[]) {
     std::cout << "J = " << ising.J << std::endl;
     std::cout << "B = " << ising.B << std::endl;
     
+    std::cout << "Local energy = " << ising.local_energy(nqstate, spins) << std::endl;
+
     return 0;
 }
