@@ -3,6 +3,7 @@
 #include <vector>
 #include <tuple>
 #include "../include/neural_state.hpp"
+#include "../include/spin_system.hpp"
 
 std::string spins_to_bits(Eigen::VectorXcf spins) {
     std::string bits = "";
@@ -43,6 +44,11 @@ int main(int argc, char *argv[]) {
     std::cout << "Weight gradient\n" << nqs_grad.weight_grad << std::endl;
     std::cout << "Visible gradient\n" << nqs_grad.visible_grad << std::endl;
     std::cout << "Hidden gradient\n" << nqs_grad.hidden_grad << std::endl;
+
+    IsingSystem ising = IsingSystem(num_visible, 1.0, 0.0);
+    std::cout << "Number of spins = " << ising.size << std::endl;
+    std::cout << "J = " << ising.J << std::endl;
+    std::cout << "B = " << ising.B << std::endl;
     
     return 0;
 }
