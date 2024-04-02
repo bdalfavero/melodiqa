@@ -15,9 +15,9 @@ struct nqs_sweep_result {
 };
 
 struct nqs_gradient {
-    Eigen::MatrixXcd weight_grad;
-    Eigen::VectorXcd visible_grad;
-    Eigen::VectorXcd hidden_grad;
+    Eigen::MatrixXcf weight_grad;
+    Eigen::VectorXcf visible_grad;
+    Eigen::VectorXcf hidden_grad;
 };
 
 class NeuralState {
@@ -53,7 +53,7 @@ public:
         std::complex<float> old_psi, new_psi;
         float r, p;
         int num_samples, num_rejected;
-        
+
         num_samples = 0;
         num_rejected = 0;
         for (int k = 0; k < nsweeps; k++) {
@@ -78,6 +78,24 @@ public:
         result.num_rejected = num_rejected;
         result.num_samples = num_samples;
         return result;
+    }
+
+    struct nqs_gradient gradient(Eigen::VectorXcf spins) {
+        Eigen::VectorXcf theta = this->hidden_bias + this->weights * spins;
+        Eigen::VectorXcf visible_gradient = spins;
+        Eigen::VectorXcf hidden_gradient = Eigen::VectorXcf::Zero(this->hidden_bias.size());
+        Eigen::MatrixXcf weight_gradient = Eigen::MatrixXcf::Zero(this->weights.rows(), this->weights.cols());
+        for (int j = 0; j < this->num_hidden; j++) {
+            hidden_gradient(j) = tanh(theta(j));
+            for (int i = 0; i < this->num_visible; i++) {
+                weight_gradient(j, i) = spins(i) * tanh(theta(j));
+            }
+        }
+        struct nqs_gradient nqs_grad;
+        nqs_grad.weight_grad = weight_gradient;
+        nqs_grad.visible_grad = visible_gradient;
+        nqs_grad.hidden_grad = hidden_gradient;
+        return nqs_grad;
     }
 };
 
