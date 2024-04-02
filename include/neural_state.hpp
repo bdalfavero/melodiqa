@@ -5,7 +5,20 @@
 #include <cmath>
 #include <complex>
 #include <vector>
+#include <tuple>
 #include <random>
+
+struct nqs_sweep_result {
+    std::vector<Eigen::VectorXcf> spin_configs;
+    int num_samples;
+    int num_rejected;
+};
+
+struct nqs_gradient {
+    Eigen::MatrixXcd weight_grad;
+    Eigen::VectorXcd visible_grad;
+    Eigen::VectorXcd hidden_grad;
+};
 
 class NeuralState {
 public:
@@ -34,12 +47,15 @@ public:
         return exp(a_dot_s) * f_i.prod();
     }
 
-    std::vector<Eigen::VectorXcf> sample_spins(int nsweeps) {
+    struct nqs_sweep_result sample_spins(int nsweeps) {
         Eigen::VectorXcf spins = Eigen::VectorXcf::Constant(this->num_visible, 1, 1.0);
         std::vector<Eigen::VectorXcf> spin_configs;
-
         std::complex<float> old_psi, new_psi;
         float r, p;
+        int num_samples, num_rejected;
+        
+        num_samples = 0;
+        num_rejected = 0;
         for (int k = 0; k < nsweeps; k++) {
             for (int i = 0; i < this->num_visible; i++) {
                 old_psi = this->evalute_state(spins);
@@ -51,11 +67,17 @@ public:
                 if (r >= p) {
                     // Flip rejected.
                     spins(i) = std::complex<float>(-1.0, 0.0) * spins(i);
+                    num_rejected++;
                 }
                 spin_configs.push_back(spins);
+                num_samples++;
             }
         }
-        return spin_configs;
+        struct nqs_sweep_result result;
+        result.spin_configs = spin_configs;
+        result.num_rejected = num_rejected;
+        result.num_samples = num_samples;
+        return result;
     }
 };
 

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <Eigen/Dense>
+#include <vector>
+#include <tuple>
 #include "../include/neural_state.hpp"
 
 std::string spins_to_bits(Eigen::VectorXcf spins) {
@@ -27,12 +29,13 @@ int main(int argc, char *argv[]) {
     std::complex<float> s_psi = nqstate.evalute_state(spins);
     std::cout << "<s|psi> = " << s_psi << std::endl;
 
-    std::cout << spins_to_bits(spins) << std::endl;
-
-    std::vector<Eigen::VectorXcf> spin_configs = nqstate.sample_spins(5);
+    struct nqs_sweep_result result = nqstate.sample_spins(5);
+    std::vector<Eigen::VectorXcf> spin_configs = result.spin_configs;
     for (int i = 0; i < spin_configs.size(); i++) {
         std::cout << spins_to_bits(spin_configs[i]) << '\n';
     }
+    std::cout << "number rejected = " << result.num_rejected << std::endl;
+    std::cout << "number of samples = " << result.num_samples << std::endl;
     
     return 0;
 }
