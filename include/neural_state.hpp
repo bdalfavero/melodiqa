@@ -81,6 +81,7 @@ public:
     }
 
     struct nqs_gradient gradient(Eigen::VectorXcf spins) {
+        // N.b. This is the gradient divided by the wave function value!
         Eigen::VectorXcf theta = this->hidden_bias + this->weights * spins;
         Eigen::VectorXcf visible_gradient = spins;
         Eigen::VectorXcf hidden_gradient = Eigen::VectorXcf::Zero(this->hidden_bias.size());

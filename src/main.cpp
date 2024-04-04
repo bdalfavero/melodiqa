@@ -1,9 +1,11 @@
 #include <iostream>
+#include <iomanip>
 #include <Eigen/Dense>
 #include <vector>
 #include <tuple>
 #include "../include/neural_state.hpp"
 #include "../include/spin_system.hpp"
+#include "../include/training.hpp"
 
 std::string spins_to_bits(Eigen::VectorXcf spins) {
     std::string bits = "";
@@ -25,32 +27,19 @@ int main(int argc, char *argv[]) {
     nqstate.hidden_bias = Eigen::VectorXcf::Constant(num_hidden, 1, 1.0);
     //nqstate.weights = Eigen::MatrixXcf::Identity(num_hidden, num_visible);
     nqstate.weights = Eigen::MatrixXcf::Zero(num_hidden, num_visible);
-    
-    Eigen::VectorXcf spins = Eigen::VectorXcf::Constant(num_visible, 1, 1.0);
-    //std::cout << spins << std::endl;
-
-    std::complex<float> s_psi = nqstate.evalute_state(spins);
-    std::cout << "<s|psi> = " << s_psi << std::endl;
-
-    struct nqs_sweep_result result = nqstate.sample_spins(5);
-    std::vector<Eigen::VectorXcf> spin_configs = result.spin_configs;
-    for (int i = 0; i < spin_configs.size(); i++) {
-        //std::cout << spins_to_bits(spin_configs[i]) << '\n';
-    }
-    std::cout << "number rejected = " << result.num_rejected << std::endl;
-    std::cout << "number of samples = " << result.num_samples << std::endl;
-
-    struct nqs_gradient nqs_grad = nqstate.gradient(spins);
-    std::cout << "Weight gradient\n" << nqs_grad.weight_grad << std::endl;
-    std::cout << "Visible gradient\n" << nqs_grad.visible_grad << std::endl;
-    std::cout << "Hidden gradient\n" << nqs_grad.hidden_grad << std::endl;
+    //std::cout << "Finished assignments." << std::endl;
 
     IsingSystem ising = IsingSystem(num_visible, 1.0, 0.0);
-    std::cout << "Number of spins = " << ising.size << std::endl;
-    std::cout << "J = " << ising.J << std::endl;
-    std::cout << "B = " << ising.B << std::endl;
-    
-    std::cout << "Local energy = " << ising.local_energy(nqstate, spins) << std::endl;
+
+    int nsweeps = 100;
+    float gamma = 1e-4;
+    struct training_step_result result; 
+    for (int i = 0; i < 10; i++) {
+        result = training_step(nqstate, ising, nsweeps, gamma);
+        std::cout << "weight grad norm = " << std::setprecision(6) << result.weight_grad_norm << std::endl;
+        std::cout << "visible grad norm = " << std::setprecision(6) << result.visible_grad_norm << std::endl;
+        std::cout << "hidden grad norm = " << std::setprecision(6) << result.hidden_grad_norm << std::endl;
+    }
 
     return 0;
 }
