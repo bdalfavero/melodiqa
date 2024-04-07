@@ -1,2 +1,5 @@
 mq
 src/*.o
+*.dat
+*.csv
+.vscode/
