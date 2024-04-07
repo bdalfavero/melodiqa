@@ -3,6 +3,8 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <tuple>
+#include <complex>
+#include <fstream>
 #include "../include/neural_state.hpp"
 #include "../include/spin_system.hpp"
 #include "../include/training.hpp"
@@ -20,25 +22,32 @@ std::string spins_to_bits(Eigen::VectorXcf spins) {
 }
 
 int main(int argc, char *argv[]) {
-    int num_visible = 4;
-    int num_hidden = 5;
+    std::ifstream input(argv[1]);
+
+    int num_visible;
+    int num_hidden;
+    input >> num_visible;
+    input >> num_hidden;
     NeuralState nqstate = NeuralState(num_visible, num_hidden);
-    nqstate.visible_bias = Eigen::VectorXcf::Constant(num_visible, 1, 1.0);
-    nqstate.hidden_bias = Eigen::VectorXcf::Constant(num_hidden, 1, 1.0);
+    nqstate.visible_bias = Eigen::VectorXcf::Random(num_visible);
+    nqstate.hidden_bias = Eigen::VectorXcf::Random(num_hidden);
     //nqstate.weights = Eigen::MatrixXcf::Identity(num_hidden, num_visible);
-    nqstate.weights = Eigen::MatrixXcf::Zero(num_hidden, num_visible);
+    nqstate.weights = Eigen::MatrixXcf::Random(num_hidden, num_visible);
     //std::cout << "Finished assignments." << std::endl;
 
-    IsingSystem ising = IsingSystem(num_visible, 1.0, 0.0);
+    IsingSystem ising = IsingSystem(num_visible, 0.0, 1.0);
 
-    int nsweeps = 100;
-    float gamma = 1e-4;
-    struct training_step_result result; 
-    for (int i = 0; i < 10; i++) {
-        result = training_step(nqstate, ising, nsweeps, gamma);
-        std::cout << "weight grad norm = " << std::setprecision(6) << result.weight_grad_norm << std::endl;
-        std::cout << "visible grad norm = " << std::setprecision(6) << result.visible_grad_norm << std::endl;
-        std::cout << "hidden grad norm = " << std::setprecision(6) << result.hidden_grad_norm << std::endl;
+    int nsweeps;
+    input >> nsweeps;
+    float gamma;
+    input >> gamma;
+    struct training_step_result result;
+    std::cout << "i,weight_grad,visible_grad,hidden_grad" << std::endl;
+    for (int i = 0; i < 1000; i++) {
+        result = training_step<IsingSystem>(nqstate, ising, nsweeps, gamma);
+        std::cout << i << "," << result.weight_grad_norm << "," 
+                << result.visible_grad_norm << "," 
+                << result.hidden_grad_norm << std::endl;;
     }
 
     return 0;
