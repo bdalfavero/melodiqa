@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
     input >> nsweeps;
     float gamma;
     input >> gamma;
+    std::cerr << gamma << std::endl;
     struct training_step_result result;
     std::cout << "i,weight_grad,visible_grad,hidden_grad" << std::endl;
     for (int i = 0; i < 1000; i++) {

@@ -75,9 +75,10 @@ struct training_step_result training_step(NeuralState nqstate, T spin_sys, int n
 
     //printf("%e %e %e\n", norm_weight_grad, norm_visible_grad, norm_hidden_grad);
 
-    nqstate.weights -= gamma * weight_grad;
-    nqstate.visible_bias -= gamma * visible_grad;
-    nqstate.hidden_bias -= gamma * hidden_grad;
+    // TODO: I set the learning rate to zero, but the weights are updating still!
+    nqstate.weights -= std::complex<float>(gamma, 0.0) * weight_grad;
+    nqstate.visible_bias -= std::complex<float>(gamma, 0.0) * visible_grad;
+    nqstate.hidden_bias -= std::complex<float>(gamma, 0.0) * hidden_grad;
 
     struct training_step_result result;
     result.weight_grad_norm = norm_weight_grad;
