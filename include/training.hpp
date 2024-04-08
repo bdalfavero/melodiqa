@@ -9,7 +9,7 @@ struct training_step_result {
 };
 
 template <typename T>
-struct training_step_result training_step(NeuralState nqstate, T spin_sys, int nsweeps, float gamma) {
+struct training_step_result training_step(NeuralState &nqstate, T spin_sys, int nsweeps, float gamma) {
     Eigen::VectorXcf spins;
     nqs_gradient grad;
     std::complex<float> s_psi;
