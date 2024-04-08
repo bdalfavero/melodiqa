@@ -3,3 +3,4 @@ src/*.o
 *.dat
 *.csv
 .vscode/
+*.png
