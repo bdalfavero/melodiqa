@@ -47,6 +47,13 @@ public:
         return exp(a_dot_s) * f_i.prod();
     }
 
+    /* TODO: Modify this to have a callback to accumulate gradients/observables
+     * The callback should take three arguments: The NQS, A spin config, and an object of unspecified
+     * type. The third argument is the quantity that we are adding up, like the grads or 
+     * observables. It should be a dummy argument so that we just update it by calling
+     * the callback function.
+     * The "host function" that calls the sweep method will divide by the number of samples.
+     */
     struct nqs_sweep_result sample_spins(int nsweeps) {
         Eigen::VectorXcf spins = Eigen::VectorXcf::Constant(this->num_visible, 1, 1.0);
         std::vector<Eigen::VectorXcf> spin_configs;
