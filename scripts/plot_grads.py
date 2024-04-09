@@ -14,10 +14,11 @@ args = parser.parse_args()
 
 df = pd.read_csv(args.filename, index_col="i")
 
-fig, ax = plt.subplots()
-sns.lineplot(data=df, x="i", y="weight_grad", ax=ax)
-sns.lineplot(data=df, x="i", y="visible_grad", ax=ax)
-sns.lineplot(data=df, x="i", y="hidden_grad", ax=ax)
+fig, ax = plt.subplots(nrows=2, ncols=1)
+sns.lineplot(data=df, x="i", y="weight_grad", ax=ax[0])
+sns.lineplot(data=df, x="i", y="visible_grad", ax=ax[0])
+sns.lineplot(data=df, x="i", y="hidden_grad", ax=ax[0])
+sns.lineplot(data=df, x="i", y="energy", ax=ax[1])
 if args.output:
     plt.savefig(args.output)
 if args.show:
