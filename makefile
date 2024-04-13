@@ -1,6 +1,6 @@
 cc=mpicxx
 cflags=-g
-include_flags=-I/Users/benjamindalfavero/include/eigen-3.4.0/
+include_flags=-I/mnt/home/dalfaver/eigen-3.4.0/
 
 sources=$(wildcard src/*.cpp)
 objects=$(patsubst %.cpp,%.o,$(sources))
