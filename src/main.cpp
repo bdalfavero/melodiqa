@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     int num_steps;
     input >> num_steps;
     struct training_step_result result;
-    std::cout << "i,weight_grad,visible_grad,hidden_grad,energy" << std::endl;
+    if (rank == 0) std::cout << "i,weight_grad,visible_grad,hidden_grad,energy" << std::endl;
     Eigen::MatrixXcf old_weights;
     Eigen::VectorXcf old_vis_bias;
     Eigen::VectorXcf old_hid_bias;
@@ -61,10 +61,13 @@ int main(int argc, char *argv[]) {
         old_vis_bias = nqstate.visible_bias;
         old_hid_bias = nqstate.hidden_bias;
         result = training_step_parallel<IsingSystem>(nqstate, ising, nsweeps, gamma, rank, world_size);
-        std::cout << i << "," << result.weight_grad_norm << "," 
-                << result.visible_grad_norm << "," 
-                << result.hidden_grad_norm << ","
-                << result.energy << std::endl;
+        //result = training_step<IsingSystem>(nqstate, ising, nsweeps, gamma);
+        if (rank == 0) {
+            std::cout << i << "," << result.weight_grad_norm << "," 
+                    << result.visible_grad_norm << "," 
+                    << result.hidden_grad_norm << ","
+                    << result.energy << std::endl;
+        }
         //std::cerr << (old_weights - nqstate.weights).norm() << std::endl;
     }
 

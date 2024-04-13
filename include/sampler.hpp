@@ -124,6 +124,7 @@ struct SamplerResult sample_spins_parallel(NeuralState nqstate, SpinSysT spin_sy
     spins = Eigen::VectorXcf::Constant(nqstate.num_visible, 1.0);
 
     int sweeps_this_rank = nsweeps / world_size;
+    //std::cout << rank << " " << sweeps_this_rank << "sweeps" << std::endl;
 
     num_samples = 0;
     num_rejected = 0;
@@ -156,6 +157,8 @@ struct SamplerResult sample_spins_parallel(NeuralState nqstate, SpinSysT spin_sy
         }
     }
 
+    //std::cout << avg_weight_gradient << std::endl;
+
     /* Get the total number of samples performed by all ranks. */
     int samples_all_ranks;
     MPI_Allreduce(&num_samples, &samples_all_ranks, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
@@ -167,8 +170,11 @@ struct SamplerResult sample_spins_parallel(NeuralState nqstate, SpinSysT spin_sy
     Eigen::MatrixXcf avg_le_wgrad_all = Eigen::MatrixXcf::Zero(nqstate.weights.rows(), nqstate.weights.cols());
     Eigen::VectorXcf avg_le_visgrad_all = Eigen::VectorXcf::Zero(nqstate.visible_bias.size());
     Eigen::VectorXcf avg_le_hidgrad_all = Eigen::VectorXcf::Zero(nqstate.hidden_bias.size());
+    //std::cout << avg_weight_gradient_all << std::endl;
+    MPI_Allreduce(&avg_local_energy, &avg_local_energy_all, 1, MPI_COMPLEX, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(avg_weight_gradient.data(), avg_weight_gradient_all.data(), avg_weight_gradient.size(), 
         MPI_COMPLEX, MPI_SUM, MPI_COMM_WORLD);
+    //std::cout << avg_weight_gradient_all << std::endl;
     MPI_Allreduce(avg_visible_gradient.data(), avg_visible_gradient_all.data(), avg_visible_gradient.size(), 
         MPI_COMPLEX, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(avg_hidden_gradient.data(), avg_hidden_gradient_all.data(), avg_hidden_gradient.size(), 
@@ -197,7 +203,7 @@ struct SamplerResult sample_spins_parallel(NeuralState nqstate, SpinSysT spin_sy
     SamplerResult result;
     result.num_samples = num_samples;
     result.num_rejected = num_rejected;
-    result.avg_local_energy = avg_local_energy;
+    result.avg_local_energy = avg_local_energy_all;
     result.weight_gradient = weight_grad;
     result.visible_gradient = visible_grad;
     result.hidden_gradient = hidden_grad;
