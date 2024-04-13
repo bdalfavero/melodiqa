@@ -1,4 +1,4 @@
-cc=g++
+cc=mpicxx
 cflags=-g
 include_flags=-I/Users/benjamindalfavero/include/eigen-3.4.0/
 

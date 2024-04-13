@@ -5,6 +5,7 @@
 #include <tuple>
 #include <complex>
 #include <fstream>
+#include <mpi.h>
 #include "../include/neural_state.hpp"
 #include "../include/spin_system.hpp"
 #include "../include/training.hpp"
@@ -22,6 +23,13 @@ std::string spins_to_bits(Eigen::VectorXcf spins) {
 }
 
 int main(int argc, char *argv[]) {
+
+    MPI_Init(&argc, &argv);
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
     std::ifstream input(argv[1]);
 
     int num_visible;
@@ -52,13 +60,15 @@ int main(int argc, char *argv[]) {
         old_weights = nqstate.weights;
         old_vis_bias = nqstate.visible_bias;
         old_hid_bias = nqstate.hidden_bias;
-        result = training_step<IsingSystem>(nqstate, ising, nsweeps, gamma);
+        result = training_step_parallel<IsingSystem>(nqstate, ising, nsweeps, gamma, rank, world_size);
         std::cout << i << "," << result.weight_grad_norm << "," 
                 << result.visible_grad_norm << "," 
                 << result.hidden_grad_norm << ","
                 << result.energy << std::endl;
         //std::cerr << (old_weights - nqstate.weights).norm() << std::endl;
     }
+
+    MPI_Finalize();
 
     return 0;
 }
